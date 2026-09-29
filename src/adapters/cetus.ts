@@ -1,0 +1,2 @@
+import type {VenueAdapter,QuoteRequest,NormalizedQuote} from '../types.js'; import {POOLS} from '../constants.js';
+export class CetusAdapter implements VenueAdapter { readonly venue='Cetus' as const; async quoteExactIn(_req:QuoteRequest):Promise<NormalizedQuote>{ throw new Error('Cetus live adapter scaffold present; verify @cetusprotocol/sui-clmm-sdk 1.4.1 API in CI before enabling. Pool: '+POOLS.cetusV3); } }
