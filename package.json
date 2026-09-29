@@ -17,7 +17,8 @@
     "discover:suidex": "tsx src/scripts/discover-suidex.ts",
     "quote:all": "tsx src/scripts/quote-all.ts",
     "scan:opportunities": "tsx src/scripts/scan-opportunities.ts",
-    "simulate:suidex-leg": "tsx src/scripts/simulate-suidex-leg.ts"
+    "simulate:suidex-leg": "tsx src/scripts/simulate-suidex-leg.ts",
+    "simulate:atomic": "tsx src/scripts/simulate-suidex-cetus-atomic.ts"
   },
   "dependencies": {
     "@mysten/sui": "^2.20.0",
