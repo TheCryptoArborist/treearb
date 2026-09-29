@@ -19,7 +19,8 @@
     "@mysten/sui": "^2.20.0",
     "@cetusprotocol/common-sdk": "1.3.3",
     "@cetusprotocol/sui-clmm-sdk": "1.4.1",
-    "turbos-clmm-sdk": "4.0.2"
+    "turbos-clmm-sdk": "4.0.2",
+    "@suidex/clmm-sdk": "1.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.5.2",
