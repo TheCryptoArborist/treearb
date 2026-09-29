@@ -1,0 +1,2 @@
+import test from 'node:test'; import assert from 'node:assert/strict'; import {MockAdapter} from './adapters/mock.js'; import {scanArbitrage} from './engine.js'; import {suiToMists} from './math.js';
+test('scans all six directed routes',async()=>{const a=[new MockAdapter('Turbos','t',1),new MockAdapter('Cetus','c',1),new MockAdapter('SuiDex','s',1)]; const r=await scanArbitrage(a,suiToMists(1),'0x0'); assert.equal(r.length,6);});
