@@ -23,6 +23,21 @@ const [suiCoin]=tx.splitCoins(tx.gas,[tx.pure.u64(inputSui)]);
 const suiBal=tx.moveCall({target:'0x2::coin::into_balance',typeArguments:[SUI],arguments:[suiCoin]});
 const treeBal=buildSuiDexSuiToTree(tx,suiBal,inputSui,buy.minAmountOut);
 const outSuiBal=buildCetusTreeToSui(tx,treeBal,buy.minAmountOut,sell.minAmountOut);
+
+// End-to-end profitability guard. Splitting this amount aborts atomically if
+// the final SUI balance is below the caller's required return.
+const requiredFinalSui=BigInt(process.env.TREE_ARB_MIN_FINAL_MIST ?? inputSui.toString());
+const profitGuard=tx.moveCall({
+  target:'0x2::balance::split',
+  typeArguments:[SUI],
+  arguments:[outSuiBal,tx.pure.u64(requiredFinalSui)],
+});
+tx.moveCall({
+  target:'0x2::balance::join',
+  typeArguments:[SUI],
+  arguments:[outSuiBal,profitGuard],
+});
+
 const outSuiCoin=tx.moveCall({target:'0x2::coin::from_balance',typeArguments:[SUI],arguments:[outSuiBal]});
 tx.transferObjects([outSuiCoin],tx.pure.address(sender));
 
