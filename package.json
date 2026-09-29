@@ -10,7 +10,8 @@
     "scan": "tsx src/cli.ts",
     "quote:turbos": "tsx src/scripts/quote-turbos.ts",
     "quote:cetus": "tsx src/scripts/quote-cetus.ts",
-    "quote:suidex": "tsx src/scripts/quote-suidex.ts"
+    "quote:suidex": "tsx src/scripts/quote-suidex.ts",
+    "quote:roundtrip": "tsx src/scripts/quote-roundtrip.ts"
   },
   "dependencies": {
     "@mysten/sui": "^2.20.0",
