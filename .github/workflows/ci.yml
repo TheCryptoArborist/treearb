@@ -73,3 +73,17 @@ jobs:
         env:
           TREE_ARB_QUOTE_ADDRESS: "0x0000000000000000000000000000000000000000000000000000000000000000"
         run: npm run quote:matrix
+
+  suidex-mainnet-quote:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install
+      - name: Quote 1 SUI to TREE on SuiDex V3
+        env:
+          TREE_ARB_QUOTE_ADDRESS: "0x0000000000000000000000000000000000000000000000000000000000000000"
+        run: npm run quote:suidex
