@@ -87,3 +87,15 @@ jobs:
         env:
           TREE_ARB_QUOTE_ADDRESS: "0x0000000000000000000000000000000000000000000000000000000000000000"
         run: npm run quote:suidex
+
+  suidex-pool-discovery:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install
+      - name: Discover SuiDex V3 TREE SUI pools
+        run: npm run discover:suidex
