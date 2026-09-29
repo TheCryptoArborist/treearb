@@ -22,6 +22,9 @@ export class SuiDexAdapter implements VenueAdapter {
     if (req.amountIn <= 0n) throw new Error('amountIn must be positive');
 
     const pool = await this.client.suidex.getPool(POOLS.suidexV3);
+    if (!pool.tokenXType || pool.tokenXType === '0x' || !pool.tokenYType || pool.tokenYType === '0x') {
+      throw new Error(`SuiDex pool ${POOLS.suidexV3} did not expose token types via getPool(): ${JSON.stringify(pool, (_, v) => typeof v === 'bigint' ? v.toString() : v)}`);
+    }
     const tokenX = normalizeStructTag(pool.tokenXType);
     const tokenY = normalizeStructTag(pool.tokenYType);
     const coinIn = normalizeStructTag(req.coinIn);
