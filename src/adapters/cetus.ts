@@ -16,8 +16,8 @@ export class CetusAdapter implements VenueAdapter {
     if (req.amountIn <= 0n) throw new Error('amountIn must be positive');
 
     const pool = await this.sdk.Pool.getPool(POOLS.cetusV3);
-    const coinA = normalizeStructTag(pool.coinTypeA);
-    const coinB = normalizeStructTag(pool.coinTypeB);
+    const coinA = normalizeStructTag(pool.coin_type_a);
+    const coinB = normalizeStructTag(pool.coin_type_b);
     const coinIn = normalizeStructTag(req.coinIn);
     const coinOut = normalizeStructTag(req.coinOut);
 
@@ -29,10 +29,10 @@ export class CetusAdapter implements VenueAdapter {
     const result = await this.sdk.Swap.preSwap({
       pool,
       current_sqrt_price: pool.current_sqrt_price,
-      coin_type_a: pool.coinTypeA,
-      coin_type_b: pool.coinTypeB,
-      decimals_a: pool.coinAmountA,
-      decimals_b: pool.coinAmountB,
+      coin_type_a: pool.coin_type_a,
+      coin_type_b: pool.coin_type_b,
+      decimals_a: pool.coin_amount_a,
+      decimals_b: pool.coin_amount_b,
       a2b,
       by_amount_in: true,
       amount: req.amountIn.toString(),
