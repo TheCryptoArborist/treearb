@@ -32,3 +32,5 @@ Before technical changes, check the current MystenLabs/skills repository. Releva
 ## Safety boundary
 
 No transaction execution is enabled until each venue adapter is proven against current mainnet quote/swap interfaces and minimum-output protection is validated.
+
+<!-- CI discovery trigger: 2026-09-29 -->
