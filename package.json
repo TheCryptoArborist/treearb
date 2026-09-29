@@ -13,7 +13,8 @@
     "quote:suidex": "tsx src/scripts/quote-suidex.ts",
     "quote:roundtrip": "tsx src/scripts/quote-roundtrip.ts",
     "quote:reverse": "tsx src/scripts/quote-reverse.ts",
-    "quote:matrix": "tsx src/scripts/quote-matrix.ts"
+    "quote:matrix": "tsx src/scripts/quote-matrix.ts",
+    "discover:suidex": "tsx src/scripts/discover-suidex.ts"
   },
   "dependencies": {
     "@mysten/sui": "^2.20.0",
