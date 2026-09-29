@@ -158,3 +158,28 @@ jobs:
         env:
           TREE_ARB_SIM_ADDRESS: "0x485953e2eadf4aa02af950cf8e914fbd2b67523385e73c36118341459d8d45c4"
         run: npm run simulate:atomic
+
+  atomic-profit-guard-negative-test:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install
+      - name: Verify atomic arb reverts below required profit
+        env:
+          TREE_ARB_SIM_ADDRESS: "0x485953e2eadf4aa02af950cf8e914fbd2b67523385e73c36118341459d8d45c4"
+          TREE_ARB_MIN_FINAL_MIST: "1010000000"
+        run: |
+          set +e
+          npm run simulate:atomic > /tmp/atomic-negative.log 2>&1
+          code=$?
+          cat /tmp/atomic-negative.log
+          if [ "$code" -eq 0 ]; then
+            echo "ERROR: atomic transaction unexpectedly passed 1.01 SUI guard"
+            exit 1
+          fi
+          grep -q "FailedTransaction" /tmp/atomic-negative.log || exit 1
+          echo "EXPECTED_ATOMIC_REVERT_CONFIRMED"
