@@ -1,0 +1,22 @@
+import { SuiGrpcClient } from '@mysten/sui/grpc';
+import { Transaction } from '@mysten/sui/transactions';
+import { TREE } from '../constants.js';
+import { suiToMists } from '../math.js';
+import { SuiDexAdapter } from '../adapters/suidex.js';
+import { buildSuiDexSuiToTree } from '../execution/suidex.js';
+
+const sender=process.env.TREE_ARB_SIM_ADDRESS;
+if(!sender) throw new Error('TREE_ARB_SIM_ADDRESS is required for owned-gas simulation');
+const client=new SuiGrpcClient({network:'mainnet',baseUrl:process.env.SUI_RPC_URL ?? 'https://fullnode.mainnet.sui.io:443'});
+const amount=suiToMists(1);
+const quote=await new SuiDexAdapter().quoteExactIn({coinIn:'0x2::sui::SUI',coinOut:TREE,amountIn:amount,slippageBps:50,sender});
+const tx=new Transaction();
+tx.setSender(sender);
+const [coin]=tx.splitCoins(tx.gas,[tx.pure.u64(amount)]);
+const inputBal=tx.moveCall({target:'0x2::coin::into_balance',typeArguments:['0x2::sui::SUI'],arguments:[coin]});
+const treeBal=buildSuiDexSuiToTree(tx,inputBal,amount,quote.minAmountOut);
+const treeCoin=tx.moveCall({target:'0x2::coin::from_balance',typeArguments:[TREE],arguments:[treeBal]});
+tx.transferObjects([treeCoin],tx.pure.address(sender));
+const result=await client.core.simulateTransaction({transaction:tx,checksEnabled:false,include:{effects:true,events:true}});
+console.log(JSON.stringify(result,(_,v)=>typeof v==='bigint'?v.toString():v,2));
+if(result.$kind==='FailedTransaction') process.exitCode=2;
