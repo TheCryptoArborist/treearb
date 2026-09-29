@@ -130,3 +130,17 @@ jobs:
           TREE_ARB_SLIPPAGE_BPS: "50"
           TREE_ARB_MIN_NET_PCT: "0"
         run: npm run scan:opportunities
+
+  simulate-suidex-composable-leg:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install
+      - name: Simulate composable SuiDex SUI to TREE leg
+        env:
+          TREE_ARB_SIM_ADDRESS: "0x485953e2eadf4aa02af950cf8e914fbd2b67523385e73c36118341459d8d45c4"
+        run: npm run simulate:suidex-leg
