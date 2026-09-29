@@ -1,0 +1,2 @@
+import type {VenueAdapter,QuoteRequest,NormalizedQuote} from '../types.js'; import {POOLS} from '../constants.js';
+export class SuiDexAdapter implements VenueAdapter { readonly venue='SuiDex' as const; async quoteExactIn(_req:QuoteRequest):Promise<NormalizedQuote>{ throw new Error('SuiDex V3 live adapter scaffold present; current SDK package/API must be verified before enabling. Pool: '+POOLS.suidexV3); } }
