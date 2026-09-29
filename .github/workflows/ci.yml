@@ -45,3 +45,17 @@ jobs:
         env:
           TREE_ARB_QUOTE_ADDRESS: "0x0000000000000000000000000000000000000000000000000000000000000000"
         run: npm run quote:roundtrip
+
+  cetus-turbos-roundtrip:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install
+      - name: Quote Cetus to Turbos round trip
+        env:
+          TREE_ARB_QUOTE_ADDRESS: "0x0000000000000000000000000000000000000000000000000000000000000000"
+        run: npm run quote:reverse
