@@ -91,6 +91,9 @@ export class CetusAdapter implements VenueAdapter {
 
     const data = event.json as Record<string, unknown> | undefined;
     if (!data) throw new Error('Cetus quote event JSON missing');
+    if (data.amount_out === undefined) {
+      throw new Error(`Cetus quote event shape: ${JSON.stringify(data)}`);
+    }
 
     const amountOut = BigInt(String(data.amount_out));
     const feeAmount = BigInt(String(data.fee_amount ?? 0));
