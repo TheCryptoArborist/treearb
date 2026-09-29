@@ -34,3 +34,5 @@ Before technical changes, check the current MystenLabs/skills repository. Releva
 No transaction execution is enabled until each venue adapter is proven against current mainnet quote/swap interfaces and minimum-output protection is validated.
 
 <!-- CI discovery trigger: 2026-09-29 -->
+
+<!-- full matrix trigger: 2026-09-29 -->
