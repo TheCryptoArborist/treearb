@@ -1,23 +1,59 @@
+import { SuiGrpcClient } from '@mysten/sui/grpc';
+import { Transaction } from '@mysten/sui/transactions';
 import { normalizeStructTag } from '@mysten/sui/utils';
-import { CetusClmmSDK } from '@cetusprotocol/sui-clmm-sdk';
 import { POOLS } from '../constants.js';
 import { minOut } from '../math.js';
 import type { NormalizedQuote, QuoteRequest, VenueAdapter } from '../types.js';
 
+const CETUS_INTEGRATE =
+  '0xae9c208cf58fd5ba36737c9ee5dcfa7f152d0fb5a5a99eebb7c881ebc2fe59e0';
+
+function parseTypeArgs(type: string): [string, string] {
+  const start = type.indexOf('<');
+  const end = type.lastIndexOf('>');
+  if (start < 0 || end <= start) throw new Error(`Unable to parse Cetus pool type: ${type}`);
+  const inner = type.slice(start + 1, end);
+  const args: string[] = [];
+  let depth = 0;
+  let last = 0;
+  for (let i = 0; i < inner.length; i++) {
+    if (inner[i] === '<') depth++;
+    else if (inner[i] === '>') depth--;
+    else if (inner[i] === ',' && depth === 0) {
+      args.push(inner.slice(last, i).trim());
+      last = i + 1;
+    }
+  }
+  args.push(inner.slice(last).trim());
+  if (args.length < 2) throw new Error(`Expected two Cetus coin type args, got ${args.length}`);
+  return [args[0]!, args[1]!];
+}
+
 export class CetusAdapter implements VenueAdapter {
   readonly venue = 'Cetus' as const;
-  private readonly sdk: ReturnType<typeof CetusClmmSDK.createSDK>;
+  private readonly client: SuiGrpcClient;
 
-  constructor(sdk = CetusClmmSDK.createSDK({ env: 'mainnet' })) {
-    this.sdk = sdk;
+  constructor(
+    client = new SuiGrpcClient({
+      network: 'mainnet',
+      baseUrl: process.env.SUI_RPC_URL ?? 'https://fullnode.mainnet.sui.io:443',
+    }),
+  ) {
+    this.client = client;
   }
 
   async quoteExactIn(req: QuoteRequest): Promise<NormalizedQuote> {
     if (req.amountIn <= 0n) throw new Error('amountIn must be positive');
 
-    const pool = await this.sdk.Pool.getPool(POOLS.cetusV3);
-    const coinA = normalizeStructTag(pool.coin_type_a);
-    const coinB = normalizeStructTag(pool.coin_type_b);
+    const { object } = await this.client.core.getObject({
+      objectId: POOLS.cetusV3,
+      include: { content: true },
+    });
+    if (!object.type) throw new Error('Cetus pool object has no type');
+
+    const [rawA, rawB] = parseTypeArgs(object.type);
+    const coinA = normalizeStructTag(rawA);
+    const coinB = normalizeStructTag(rawB);
     const coinIn = normalizeStructTag(req.coinIn);
     const coinOut = normalizeStructTag(req.coinOut);
 
@@ -26,22 +62,39 @@ export class CetusAdapter implements VenueAdapter {
     else if (coinIn === coinB && coinOut === coinA) a2b = false;
     else throw new Error(`Cetus pool does not contain requested pair: ${req.coinIn} -> ${req.coinOut}`);
 
-    const result = await this.sdk.Swap.preSwap({
-      pool,
-      current_sqrt_price: pool.current_sqrt_price,
-      coin_type_a: pool.coin_type_a,
-      coin_type_b: pool.coin_type_b,
-      decimals_a: pool.coin_amount_a,
-      decimals_b: pool.coin_amount_b,
-      a2b,
-      by_amount_in: true,
-      amount: req.amountIn.toString(),
+    const tx = new Transaction();
+    tx.moveCall({
+      target: `${CETUS_INTEGRATE}::fetcher::calculate_swap_result`,
+      typeArguments: [rawA, rawB],
+      arguments: [
+        tx.object(POOLS.cetusV3),
+        tx.pure.bool(a2b),
+        tx.pure.bool(true),
+        tx.pure.u64(req.amountIn),
+      ],
     });
+    tx.setSender(req.sender);
 
-    if (!result) throw new Error('Cetus returned no pre-swap result');
-    if (result.is_exceed) throw new Error('Cetus quote exceeds available liquidity');
+    const sim = await this.client.core.simulateTransaction({
+      transaction: tx,
+      checksEnabled: false,
+      include: { events: true },
+    });
+    if (sim.$kind === 'FailedTransaction') {
+      throw new Error(`Cetus quote simulation failed: ${sim.FailedTransaction.status.error?.message ?? 'unknown error'}`);
+    }
 
-    const amountOut = BigInt(result.estimated_amount_out);
+    const event = (sim.Transaction.events ?? []).find((e) =>
+      e.eventType.includes('::fetcher::CalculatedSwapResultEvent'),
+    );
+    if (!event) throw new Error('Cetus CalculatedSwapResultEvent missing');
+
+    const data = event.json as Record<string, unknown> | undefined;
+    if (!data) throw new Error('Cetus quote event JSON missing');
+
+    const amountOut = BigInt(String(data.amount_out));
+    const feeAmount = BigInt(String(data.fee_amount ?? 0));
+    if (String(data.is_exceed) === 'true') throw new Error('Cetus quote exceeds available liquidity');
     if (amountOut <= 0n) throw new Error('Cetus returned a zero/negative output');
 
     return {
@@ -52,9 +105,9 @@ export class CetusAdapter implements VenueAdapter {
       amountIn: req.amountIn,
       amountOut,
       minAmountOut: minOut(amountOut, req.slippageBps),
-      feeAmount: BigInt(result.estimated_fee_amount),
+      feeAmount,
       executable: true,
-      raw: result,
+      raw: data,
     };
   }
 }
