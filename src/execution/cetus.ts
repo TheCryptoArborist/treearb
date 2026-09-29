@@ -1,7 +1,7 @@
 import type { Transaction, TransactionArgument } from '@mysten/sui/transactions';
 import { POOLS, SUI, TREE } from '../constants.js';
 
-const CETUS_CLMM='0x1eabed72c53feb3805120a081dc15963c204dc8d091542592abaf7a35689b2fb';
+const CETUS_CLMM='0x25ebb9a7c50eb17b3fa9c5a30fb8b5ad8f97caaf4928943acbcff7153dfee5e3';
 const CETUS_CONFIG='0xdaa46292632c3c4d8f31f23ea0f9b36a28ff3677e9684980e4438403a67a3d8f';
 const MAX_SQRT_PRICE=79226673515401279992447579055n;
 
