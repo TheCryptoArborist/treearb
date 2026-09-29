@@ -89,15 +89,13 @@ export class CetusAdapter implements VenueAdapter {
     );
     if (!event) throw new Error('Cetus CalculatedSwapResultEvent missing');
 
-    const data = event.json as Record<string, unknown> | undefined;
-    if (!data) throw new Error('Cetus quote event JSON missing');
-    if (data.amount_out === undefined) {
-      throw new Error(`Cetus quote event shape: ${JSON.stringify(data)}`);
-    }
+    const envelope = event.json as { data?: Record<string, unknown> } | undefined;
+    const data = envelope?.data;
+    if (!data) throw new Error('Cetus quote event data missing');
 
     const amountOut = BigInt(String(data.amount_out));
     const feeAmount = BigInt(String(data.fee_amount ?? 0));
-    if (String(data.is_exceed) === 'true') throw new Error('Cetus quote exceeds available liquidity');
+    if (data.is_exceed === true || String(data.is_exceed) === 'true') throw new Error('Cetus quote exceeds available liquidity');
     if (amountOut <= 0n) throw new Error('Cetus returned a zero/negative output');
 
     return {
