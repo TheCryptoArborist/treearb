@@ -144,3 +144,17 @@ jobs:
         env:
           TREE_ARB_SIM_ADDRESS: "0x485953e2eadf4aa02af950cf8e914fbd2b67523385e73c36118341459d8d45c4"
         run: npm run simulate:suidex-leg
+
+  simulate-suidex-cetus-atomic:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm install
+      - name: Simulate atomic SuiDex to Cetus arb PTB
+        env:
+          TREE_ARB_SIM_ADDRESS: "0x485953e2eadf4aa02af950cf8e914fbd2b67523385e73c36118341459d8d45c4"
+        run: npm run simulate:atomic
