@@ -6,7 +6,7 @@ import { minOut } from '../math.js';
 import type { NormalizedQuote, QuoteRequest, VenueAdapter } from '../types.js';
 
 const CETUS_INTEGRATE =
-  '0xae9c208cf58fd5ba36737c9ee5dcfa7f152d0fb5a5a99eebb7c881ebc2fe59e0';
+  '0x996c4d9480708fb8b92aa7acf819fb0497b5ec8e65ba06601cae2fb6db3312c3';
 
 function parseTypeArgs(type: string): [string, string] {
   const start = type.indexOf('<');
@@ -64,7 +64,7 @@ export class CetusAdapter implements VenueAdapter {
 
     const tx = new Transaction();
     tx.moveCall({
-      target: `${CETUS_INTEGRATE}::fetcher::calculate_swap_result`,
+      target: `${CETUS_INTEGRATE}::fetcher_script::calculate_swap_result`,
       typeArguments: [rawA, rawB],
       arguments: [
         tx.object(POOLS.cetusV3),
@@ -85,7 +85,7 @@ export class CetusAdapter implements VenueAdapter {
     }
 
     const event = (sim.Transaction.events ?? []).find((e) =>
-      e.eventType.includes('::fetcher::CalculatedSwapResultEvent'),
+      e.eventType.includes('::fetcher_script::CalculatedSwapResultEvent'),
     );
     if (!event) throw new Error('Cetus CalculatedSwapResultEvent missing');
 
