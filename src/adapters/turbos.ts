@@ -1,0 +1,2 @@
+import type {VenueAdapter,QuoteRequest,NormalizedQuote} from '../types.js'; import {POOLS} from '../constants.js'; import {minOut} from '../math.js';
+export class TurbosAdapter implements VenueAdapter { readonly venue='Turbos' as const; async quoteExactIn(_req:QuoteRequest):Promise<NormalizedQuote>{ throw new Error('Turbos live adapter scaffold present, but runtime SDK signature must be verified in CI before enabling execution. Pool: '+POOLS.turbosV3); } }
